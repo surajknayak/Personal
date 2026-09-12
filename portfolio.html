@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Suraj Kumar Nayak — Product Manager building payment, API and financial infrastructure products.">
+<title>Suraj Kumar Nayak — Product Manager</title>
+<style>
+  :root{
+    --bg:#f5f5f7; --surface:rgba(255,255,255,.72); --solid:#fff;
+    --text:#1d1d1f; --muted:#6e6e73; --line:rgba(0,0,0,.09);
+    --blue:#0071e3; --green:#34c759; --shadow:0 24px 70px rgba(0,0,0,.08);
+    --radius:30px; --max:1180px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",sans-serif;line-height:1.45;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .nav{position:fixed;top:0;left:0;right:0;z-index:20;background:rgba(245,245,247,.76);backdrop-filter:saturate(180%) blur(22px);border-bottom:1px solid var(--line)}
+  .nav-inner{max-width:var(--max);margin:auto;height:54px;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+  .brand{font-weight:650;letter-spacing:-.02em}
+  .nav-links{display:flex;gap:26px;font-size:13px;color:#424245}
+  .nav-links a:hover{color:var(--blue)}
+  .menu{display:none;border:0;background:none;font-size:22px}
+  .wrap{max-width:var(--max);margin:auto;padding:0 24px}
+  .hero{min-height:92vh;display:grid;place-items:center;padding-top:90px}
+  .hero-grid{width:100%;display:grid;grid-template-columns:1.2fr .8fr;gap:50px;align-items:center}
+  .eyebrow{font-size:15px;color:var(--blue);font-weight:650;margin-bottom:18px}
+  h1{font-size:clamp(54px,8vw,104px);line-height:.94;letter-spacing:-.075em;margin:0 0 28px;font-weight:700}
+  .hero-copy{font-size:clamp(20px,2.3vw,28px);line-height:1.2;letter-spacing:-.025em;max-width:760px;color:#424245}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+  .pill{padding:9px 14px;border:1px solid var(--line);background:rgba(255,255,255,.6);border-radius:999px;font-size:13px;color:#424245}
+  .hero-card{background:linear-gradient(145deg,#fff,#e9e9ed);border-radius:40px;padding:34px;box-shadow:var(--shadow);min-height:390px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative}
+  .hero-card:before{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(0,113,227,.18),transparent 68%);right:-70px;top:-60px}
+  .card-label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+  .big-stat{font-size:72px;line-height:1;letter-spacing:-.07em;font-weight:700;position:relative}
+  .stat-sub{font-size:18px;color:#424245;max-width:230px;position:relative}
+  .scroll{font-size:12px;color:var(--muted);margin-top:32px}
+  section{padding:105px 0}
+  .section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:42px}
+  .section-kicker{font-size:13px;color:var(--blue);font-weight:650;text-transform:uppercase;letter-spacing:.09em}
+  h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.055em;margin:8px 0 0}
+  .section-intro{max-width:430px;color:var(--muted);font-size:16px}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .metric{background:var(--solid);border-radius:24px;padding:26px;min-height:170px;border:1px solid var(--line)}
+  .metric strong{display:block;font-size:40px;letter-spacing:-.055em;margin-bottom:12px}
+  .metric span{color:var(--muted);font-size:14px}
+  .experience{display:grid;gap:18px}
+  .job{background:var(--solid);border-radius:28px;padding:32px;border:1px solid var(--line);transition:.25s transform,.25s box-shadow}
+  .job:hover{transform:translateY(-3px);box-shadow:0 18px 50px rgba(0,0,0,.06)}
+  .job-top{display:flex;justify-content:space-between;gap:20px;margin-bottom:22px}
+  .job-title{font-size:25px;font-weight:650;letter-spacing:-.03em}
+  .job-company{color:var(--muted);margin-top:4px}
+  .date{font-size:13px;color:var(--muted);white-space:nowrap}
+  .job ul{margin:0;padding-left:20px;color:#424245}
+  .job li{margin:11px 0;padding-left:4px}
+  .highlight{font-weight:650;color:var(--text)}
+  .case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .case{border-radius:30px;padding:30px;min-height:310px;background:#1d1d1f;color:#fff;display:flex;flex-direction:column;justify-content:space-between}
+  .case:nth-child(2){background:#e8f1ff;color:var(--text)}
+  .case:nth-child(3){background:#e9f7ed;color:var(--text)}
+  .case-number{font-size:12px;opacity:.6}
+  .case h3{font-size:29px;letter-spacing:-.045em;line-height:1.05;margin:0 0 12px}
+  .case p{margin:0;opacity:.78;font-size:14px}
+  .case-stat{font-size:48px;font-weight:700;letter-spacing:-.06em;margin-top:25px}
+  .skills{display:flex;flex-wrap:wrap;gap:10px}
+  .skill{background:var(--solid);border:1px solid var(--line);border-radius:999px;padding:11px 15px;font-size:14px}
+  .education{display:grid;grid-template-columns:1fr auto;gap:20px;background:var(--solid);padding:34px;border-radius:28px;border:1px solid var(--line)}
+  .edu-title{font-size:25px;font-weight:650;letter-spacing:-.03em}
+  .edu-sub{color:var(--muted);margin-top:5px}
+  .year{font-size:15px;color:var(--muted)}
+  .cta{padding:120px 0 70px;text-align:center}
+  .cta h2{max-width:780px;margin:0 auto 28px}
+  .cta p{color:var(--muted);font-size:18px;margin:0 auto 30px}
+  .buttons{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:13px 20px;border-radius:999px;font-size:14px;font-weight:600;border:1px solid transparent}
+  .btn-primary{background:var(--blue);color:white}
+  .btn-secondary{background:var(--solid);border-color:var(--line)}
+  footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:12px}
+  .footer-inner{display:flex;justify-content:space-between;gap:20px}
+  @media(max-width:800px){
+    .nav-links{display:none}.menu{display:block}
+    .hero{min-height:auto;padding:120px 0 70px}.hero-grid{grid-template-columns:1fr;gap:35px}
+    .hero-card{min-height:300px}
+    .metrics{grid-template-columns:1fr 1fr}.case-grid{grid-template-columns:1fr}
+    section{padding:75px 0}.section-head{display:block}.section-intro{margin-top:18px}
+  }
+  @media(max-width:520px){
+    .wrap{padding:0 18px}.nav-inner{padding:0 18px}
+    h1{font-size:58px}.metrics{grid-template-columns:1fr}
+    .job{padding:24px}.job-top{display:block}.date{margin-top:8px}
+    .education{grid-template-columns:1fr}
+    .footer-inner{display:block}.footer-inner div+div{margin-top:8px}
+  }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top">Suraj Kumar Nayak</a>
+    <div class="nav-links">
+      <a href="#impact">Impact</a><a href="#experience">Experience</a><a href="#work">Focus</a><a href="#skills">Skills</a><a href="#contact">Contact</a>
+    </div>
+    <button class="menu" aria-label="Open navigation" onclick="document.querySelector('.nav-links').style.display='flex'">☰</button>
+  </div>
+</nav>
+
+<main id="top">
+  <div class="wrap hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Product Manager · Payments · Platforms</div>
+        <h1>Building the infrastructure behind better financial products.</h1>
+        <div class="hero-copy">Product Manager with ~10 years of experience building and scaling payment, API and financial infrastructure products across payment rails, banking integrations, authentication and transaction optimization.</div>
+        <div class="hero-meta">
+          <span class="pill">Bengaluru, India</span>
+          <span class="pill">IIT Guwahati</span>
+          <span class="pill">Wipro · Mastercard</span>
+        </div>
+        <div class="scroll">Scroll to explore ↓</div>
+      </div>
+      <div class="hero-card">
+        <div class="card-label">Platform scale</div>
+        <div>
+          <div class="big-stat">240M+</div>
+          <div class="stat-sub">transactions processed monthly across an enterprise payment ecosystem.</div>
+        </div>
+        <div class="card-label">~$400k monthly revenue · 20 gateways · 7 card brands</div>
+      </div>
+    </div>
+  </div>
+
+  <section id="impact">
+    <div class="wrap">
+      <div class="section-head">
+        <div><div class="section-kicker">At a glance</div><h2>Impact, measured.</h2></div>
+        <div class="section-intro">A product career centered on scale, reliability, developer experience and measurable business outcomes.</div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><strong>240M+</strong><span>monthly transactions</span></div>
+        <div class="metric"><strong>4M+</strong><span>authentication users</span></div>
+        <div class="metric"><strong>99.99%</strong><span>platform availability</span></div>
+        <div class="metric"><strong>70%</strong><span>transaction latency reduction</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="wrap">
+      <div class="section-head">
+        <div><div class="section-kicker">Career</div><h2>Experience.</h2></div>
+        <div class="section-intro">From enterprise payments and authentication to lending platforms, with ownership spanning strategy, discovery and technical execution.</div>
+      </div>
+      <div class="experience">
+        <article class="job">
+          <div class="job-top">
+            <div><div class="job-title">Senior Product Manager</div><div class="job-company">Wipro · Client: Mastercard</div></div>
+            <div class="date">Sep 2022 — Present</div>
+          </div>
+          <ul>
+            <li>Launched an API-driven <span class="highlight">3-D Secure (3DS) orchestration platform</span> processing 240M+ transactions monthly across 20 payment gateways and 7 card brands, generating ~$400k in monthly revenue.</li>
+            <li>Led data-layer modernization from Oracle to PostgreSQL, reducing operational database costs by <span class="highlight">60%+</span> while maintaining platform availability.</li>
+            <li>Owned end-to-end product evolution of Mastercard's enterprise MFA product across iOS, Android and Web, scaling secure authentication to <span class="highlight">4M+ users across 8 enterprise clients</span>.</li>
+            <li>Shaped geo-specific routing across India, NAM and Belgium, reducing transaction latency by <span class="highlight">70%</span> while meeting data-localization and regulatory requirements.</li>
+            <li>Introduced rate limiting, real-time monitoring and observability improvements that increased availability to <span class="highlight">99.99%</span>.</li>
+            <li>Redesigned API documentation and SDK integration guides, reducing partner integration effort and accelerating enterprise go-lives.</li>
+            <li>Streamlined roadmap-to-release workflows across 2 product streams, reducing release cycles from <span class="highlight">8 to 6 weeks</span>.</li>
+          </ul>
+        </article>
+
+        <article class="job">
+          <div class="job-top">
+            <div><div class="job-title">Senior Consultant</div><div class="job-company">Wipro</div></div>
+            <div class="date">Jun 2022 — Sep 2022</div>
+          </div>
+          <ul>
+            <li>Drove product and GTM strategy across digital banking and credit card businesses in Africa and India using market research, competitive intelligence and customer insights.</li>
+            <li>Built a data-driven market segmentation and prioritization framework across <span class="highlight">6 African countries</span>.</li>
+            <li>Spearheaded credit-card expansion across multiple regions, launching <span class="highlight">8+ digital and offline acquisition channels</span>.</li>
+          </ul>
+        </article>
+
+        <article class="job">
+          <div class="job-top">
+            <div><div class="job-title">Solutions Consultant II</div><div class="job-company">FICO</div></div>
+            <div class="date">Jun 2017 — May 2022</div>
+          </div>
+          <ul>
+            <li>Designed and scaled API-driven lending platforms across 2 major lines of business, reducing application processing time by <span class="highlight">25%</span>.</li>
+            <li>Scaled solutions across <span class="highlight">1,300+ branches and 20M+ end users</span>.</li>
+            <li>Led enterprise B2B integrations and product discovery across REST APIs, workflow engines and core banking systems; conducted 20+ client demos and 10+ POCs.</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="wrap">
+      <div class="section-head">
+        <div><div class="section-kicker">What I build</div><h2>Where product meets systems.</h2></div>
+        <div class="section-intro">The common thread across my work: complex infrastructure made dependable, scalable and easier for people to use.</div>
+      </div>
+      <div class="case-grid">
+        <article class="case">
+          <div class="case-number">01 · PAYMENTS</div>
+          <div><h3>Orchestrating payment flows at scale.</h3><p>API-driven 3DS infrastructure spanning gateways, card brands and fraud-mitigation workflows.</p><div class="case-stat">240M+</div></div>
+        </article>
+        <article class="case">
+          <div class="case-number">02 · AUTHENTICATION</div>
+          <div><h3>Balancing security with user experience.</h3><p>Enterprise MFA across mobile and web, including authentication and fallback workflows.</p><div class="case-stat">4M+</div></div>
+        </article>
+        <article class="case">
+          <div class="case-number">03 · PLATFORM</div>
+          <div><h3>Making infrastructure more resilient.</h3><p>Modern data layers, geo-routing, observability, rate limiting and developer tooling.</p><div class="case-stat">99.99%</div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap">
+      <div class="section-head">
+        <div><div class="section-kicker">Toolkit</div><h2>Skills & technology.</h2></div>
+        <div class="section-intro">A product toolkit comfortable at the intersection of business strategy, APIs, data and engineering.</div>
+      </div>
+      <div class="skills">
+        <span class="skill">Product Strategy & Roadmapping</span><span class="skill">Platform Product Management</span><span class="skill">API Lifecycle Management</span><span class="skill">Backlog Prioritization</span><span class="skill">GTM Strategy</span><span class="skill">Agile</span><span class="skill">Developer Experience</span><span class="skill">Authentication & Authorization</span><span class="skill">SQL</span><span class="skill">PowerBI</span><span class="skill">Domo</span><span class="skill">Tableau</span><span class="skill">Splunk</span><span class="skill">REST API</span><span class="skill">JSON</span><span class="skill">XML</span><span class="skill">Azure</span><span class="skill">Oracle</span><span class="skill">Postman</span><span class="skill">Jenkins</span><span class="skill">GitHub</span><span class="skill">Bitbucket</span><span class="skill">CI/CD</span><span class="skill">JIRA</span><span class="skill">Rally</span><span class="skill">Confluence</span><span class="skill">SDK</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div><div class="section-kicker">Education</div><h2>Foundation.</h2></div>
+      </div>
+      <div class="education">
+        <div><div class="edu-title">Indian Institute of Technology (IIT), Guwahati</div><div class="edu-sub">Bachelor of Technology · Guwahati, India</div></div>
+        <div class="year">2013 — 2017</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="cta">
+    <div class="wrap">
+      <div class="section-kicker">Let's connect</div>
+      <h2>Interested in building products that operate at real-world scale?</h2>
+      <p>I'm open to conversations around product leadership, payments, platform infrastructure and financial technology.</p>
+      <div class="buttons">
+        <a class="btn btn-primary" href="mailto:surajkumarnayak25@gmail.com">Email Suraj</a>
+        <a class="btn btn-secondary" href="https://www.linkedin.com/in/skn125/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div>© 2026 Suraj Kumar Nayak</div>
+    <div>Product · Payments · Platforms · Financial Infrastructure</div>
+  </div>
+</footer>
+</body>
+</html>
