@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RAG Simulator — Learn Retrieval Augmented Generation</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --bg: #f5f5f7;
+        --card: rgba(255,255,255,.82);
+        --card-solid: #ffffff;
+        --text: #161618;
+        --muted: #6e6e73;
+        --border: rgba(0,0,0,.08);
+        --blue: #0071e3;
+        --blue-soft: #eaf4ff;
+        --purple: #7c3aed;
+        --purple-soft: #f2edff;
+        --green: #16a34a;
+        --green-soft: #eaf8ef;
+        --orange: #ea580c;
+        --orange-soft: #fff3e8;
+        --red: #dc2626;
+        --shadow: 0 12px 40px rgba(0,0,0,.07);
+        --radius: 20px;
+    }
+
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                     "SF Pro Text", Inter, Segoe UI, sans-serif;
+        background:
+            radial-gradient(circle at 10% 0%, rgba(0,113,227,.08), transparent 28%),
+            radial-gradient(circle at 90% 15%, rgba(124,58,237,.08), transparent 28%),
+            var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+    }
+
+    button, input, textarea, select {
+        font: inherit;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    .app {
+        max-width: 1500px;
+        margin: auto;
+        padding: 32px 28px 60px;
+    }
+
+    /* HEADER */
+
+    header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 30px;
+        margin-bottom: 32px;
+    }
+
+    .brand {
+        max-width: 760px;
+    }
+
+    .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: rgba(0,113,227,.08);
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        margin-bottom: 13px;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: clamp(34px, 4vw, 54px);
+        line-height: 1.02;
+        letter-spacing: -.045em;
+    }
+
+    .subtitle {
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.55;
+        margin: 16px 0 0;
+        max-width: 700px;
+    }
+
+    .header-badge {
+        padding: 15px 18px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,.65);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        text-align: right;
+        min-width: 180px;
+    }
+
+    .header-badge strong {
+        display: block;
+        font-size: 25px;
+        letter-spacing: -.03em;
+    }
+
+    .header-badge span {
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    /* PIPELINE */
+
+    .pipeline {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+
+    .pipeline-step {
+        position: relative;
+        padding: 15px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,.68);
+        transition: .3s ease;
+        cursor: pointer;
+    }
+
+    .pipeline-step:hover {
+        transform: translateY(-2px);
+    }
+
+    .pipeline-step.active {
+        background: var(--text);
+        color: white;
+        border-color: var(--text);
+        box-shadow: 0 10px 25px rgba(0,0,0,.15);
+    }
+
+    .pipeline-step.done {
+        border-color: rgba(22,163,74,.35);
+    }
+
+    .pipeline-number {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--muted);
+        margin-bottom: 8px;
+    }
+
+    .active .pipeline-number {
+        color: #aaa;
+    }
+
+    .pipeline-title {
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .pipeline-subtitle {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 4px;
+    }
+
+    .active .pipeline-subtitle {
+        color: #aaa;
+    }
+
+    /* MAIN GRID */
+
+    .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(340px, .7fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .left-column,
+    .right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 21px 23px 17px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 17px;
+        letter-spacing: -.02em;
+    }
+
+    .card-header p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    .card-body {
+        padding: 22px;
+    }
+
+    /* DOCUMENT INGESTION */
+
+    .document-flow {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 9px;
+        align-items: center;
+    }
+
+    .flow-node {
+        min-height: 110px;
+        padding: 14px;
+        border-radius: 15px;
+        background: #fafafa;
+        border: 1px solid var(--border);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: .35s ease;
+    }
+
+    .flow-node .icon {
+        font-size: 25px;
+        margin-bottom: 8px;
+    }
+
+    .flow-node strong {
+        font-size: 12px;
+    }
+
+    .flow-node small {
+        color: var(--muted);
+        margin-top: 4px;
+        font-size: 10px;
+        line-height: 1.3;
+    }
+
+    .flow-node.highlight {
+        background: var(--blue-soft);
+        border-color: rgba(0,113,227,.25);
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,113,227,.1);
+    }
+
+    /* QUERY */
+
+    textarea {
+        width: 100%;
+        resize: vertical;
+        min-height: 105px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 15px;
+        background: rgba(250,250,250,.8);
+        color: var(--text);
+        outline: none;
+        transition: .2s;
+        line-height: 1.5;
+    }
+
+    textarea:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 4px rgba(0,113,227,.08);
+    }
+
+    .query-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-weight: 700;
+        transition: .2s;
+    }
+
+    .primary-btn {
+        background: var(--text);
+        color: white;
+    }
+
+    .primary-btn:hover {
+        transform: translateY(-1px);
+        background: #2b2b2e;
+    }
+
+    .secondary-btn {
+        background: #eeeef0;
+        color: var(--text);
+    }
+
+    .secondary-btn:hover {
+        background: #e4e4e7;
+    }
+
+    .preset-row {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-top: 13px;
+    }
+
+    .preset {
+        border: 1px solid var(--border);
+        background: white;
+        padding: 7px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        color: var(--muted);
+    }
+
+    .preset:hover {
+        color: var(--text);
+        border-color: #bbb;
+    }
+
+    /* RETRIEVAL */
+
+    .retrieval-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .control-box {
+        padding: 13px;
+        border-radius: 13px;
+        background: #fafafa;
+        border: 1px solid var(--border);
+    }
+
+    .control-box label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 9px;
+    }
+
+    input[type="range"] {
+        width: 100%;
+        accent-color: var(--blue);
+    }
+
+    .search-bar {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+    }
+
+    .search-pill {
+        padding: 7px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .semantic {
+        background: var(--purple-soft);
+        color: var(--purple);
+    }
+
+    .keyword {
+        background: var(--orange-soft);
+        color: var(--orange);
+    }
+
+    .hybrid {
+        background: var(--green-soft);
+        color: var(--green);
+    }
+
+    /* CHUNKS */
+
+    .chunks {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .chunk {
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 13px;
+        background: #fff;
+        transition: .3s ease;
+    }
+
+    .chunk:hover {
+        box-shadow: 0 5px 18px rgba(0,0,0,.06);
+    }
+
+    .chunk-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 7px;
+    }
+
+    .chunk-title {
+        font-weight: 700;
+        font-size: 12px;
+    }
+
+    .score {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--green);
+    }
+
+    .chunk p {
+        color: #555;
+        font-size: 12px;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .metadata {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        margin-top: 9px;
+    }
+
+    .metadata span {
+        padding: 4px 7px;
+        border-radius: 6px;
+        background: #f2f2f4;
+        color: var(--muted);
+        font-size: 9px;
+    }
+
+    .rank-badge {
+        width: 22px;
+        height: 22px;
+        border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f1f3;
+        font-size: 10px;
+        margin-right: 7px;
+    }
+
+    /* AUGMENTATION */
+
+    .prompt-preview {
+        background: #171719;
+        color: #f4f4f4;
+        border-radius: 14px;
+        padding: 17px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px;
+        line-height: 1.65;
+        overflow: auto;
+        max-height: 340px;
+        white-space: pre-wrap;
+    }
+
+    .prompt-label {
+        color: #9ca3af;
+    }
+
+    .prompt-context {
+        color: #b7e3ff;
+    }
+
+    /* GENERATION */
+
+    .answer {
+        padding: 20px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #f8fbff, #fff);
+        border: 1px solid rgba(0,113,227,.12);
+        line-height: 1.7;
+        font-size: 14px;
+    }
+
+    .answer h3 {
+        margin: 0 0 10px;
+        font-size: 13px;
+    }
+
+    .citation {
+        display: inline-block;
+        padding: 3px 7px;
+        background: var(--blue-soft);
+        color: var(--blue);
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 700;
+        margin: 1px;
+    }
+
+    /* EXPLANATION */
+
+    .explanation {
+        padding: 17px;
+        border-radius: 14px;
+        background: #fafafa;
+        border: 1px solid var(--border);
+    }
+
+    .explanation .stage {
+        color: var(--blue);
+        font-weight: 800;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        margin-bottom: 7px;
+    }
+
+    .explanation h3 {
+        margin: 0 0 6px;
+        font-size: 16px;
+    }
+
+    .explanation p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    /* METRICS */
+
+    .metrics {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 9px;
+    }
+
+    .metric {
+        padding: 13px;
+        border-radius: 12px;
+        background: #fafafa;
+        border: 1px solid var(--border);
+    }
+
+    .metric-value {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -.04em;
+    }
+
+    .metric-label {
+        color: var(--muted);
+        font-size: 9px;
+        margin-top: 3px;
+    }
+
+    /* PROGRESS */
+
+    .progress-wrap {
+        margin-bottom: 20px;
+    }
+
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
+
+    .progress {
+        height: 6px;
+        background: #e9e9eb;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: var(--blue);
+        border-radius: 999px;
+        transition: width .5s ease;
+    }
+
+    /* TOOLTIP STYLE */
+
+    .concept {
+        border-bottom: 1px dashed var(--blue);
+        color: var(--blue);
+        cursor: help;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 1050px) {
+        .workspace {
+            grid-template-columns: 1fr;
+        }
+
+        .right-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .right-column > .card:last-child {
+            grid-column: span 2;
+        }
+    }
+
+    @media (max-width: 750px) {
+        .app {
+            padding: 20px 14px 40px;
+        }
+
+        header {
+            flex-direction: column;
+        }
+
+        .header-badge {
+            text-align: left;
+        }
+
+        .pipeline {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .document-flow {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .document-flow .flow-node:last-child {
+            grid-column: span 2;
+        }
+
+        .right-column {
+            display: flex;
+        }
+
+        .retrieval-controls {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- HEADER -->
+    <header>
+        <div class="brand">
+            <div class="eyebrow">Interactive AI Learning Tool</div>
+            <h1>RAG, made visual.</h1>
+            <p class="subtitle">
+                Explore how documents become searchable knowledge, how a user query
+                retrieves relevant context, and how an LLM uses that context to
+                generate a grounded answer.
+            </p>
+        </div>
+
+        <div class="header-badge">
+            <strong>5 stages</strong>
+            <span>Ingestion → Retrieval → Re-ranking → Augmentation → Generation</span>
+        </div>
+    </header>
+
+
+    <!-- PIPELINE -->
+    <div class="pipeline">
+
+        <div class="pipeline-step active" data-stage="0">
+            <div class="pipeline-number">01</div>
+            <div class="pipeline-title">Knowledge Ingestion</div>
+            <div class="pipeline-subtitle">Build the knowledge base</div>
+        </div>
+
+        <div class="pipeline-step" data-stage="1">
+            <div class="pipeline-number">02</div>
+            <div class="pipeline-title">Retrieval</div>
+            <div class="pipeline-subtitle">Find relevant chunks</div>
+        </div>
+
+        <div class="pipeline-step" data-stage="2">
+            <div class="pipeline-number">03</div>
+            <div class="pipeline-title">Re-ranking</div>
+            <div class="pipeline-subtitle">Improve relevance</div>
+        </div>
+
+        <div class="pipeline-step" data-stage="3">
+            <div class="pipeline-number">04</div>
+            <div class="pipeline-title">Augmentation</div>
+            <div class="pipeline-subtitle">Build LLM context</div>
+        </div>
+
+        <div class="pipeline-step" data-stage="4">
+            <div class="pipeline-number">05</div>
+            <div class="pipeline-title">Generation</div>
+            <div class="pipeline-subtitle">Generate answer</div>
+        </div>
+
+    </div>
+
+
+    <!-- WORKSPACE -->
+    <div class="workspace">
+
+        <div class="left-column">
+
+            <!-- KNOWLEDGE INGESTION -->
+            <section class="card" id="ingestionCard">
+
+                <div class="card-header">
+                    <div>
+                        <h2>Knowledge ingestion</h2>
+                        <p>What happens before the user asks a question?</p>
+                    </div>
+                    <span class="search-pill semantic">OFFLINE</span>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="document-flow">
+
+                        <div class="flow-node" data-node="0">
+                            <div class="icon">📄</div>
+                            <strong>Documents</strong>
+                            <small>PDF, HTML, DOCX, etc.</small>
+                        </div>
+
+                        <div class="flow-node" data-node="1">
+                            <div class="icon">🧹</div>
+                            <strong>Parse & Clean</strong>
+                            <small>Extract useful text</small>
+                        </div>
+
+                        <div class="flow-node" data-node="2">
+                            <div class="icon">✂️</div>
+                            <strong>Chunk</strong>
+                            <small>Break into meaningful pieces</small>
+                        </div>
+
+                        <div class="flow-node" data-node="3">
+                            <div class="icon">🔢</div>
+                            <strong>Embedding</strong>
+                            <small>Text → vector</small>
+                        </div>
+
+                        <div class="flow-node" data-node="4">
+                            <div class="icon">🗄️</div>
+                            <strong>Vector DB</strong>
+                            <small>Store vectors + metadata</small>
+                        </div>
+
+                    </div>
+
+                    <div class="explanation" style="margin-top:18px;">
+                        <div class="stage">Why this matters</div>
+                        <h3>Good retrieval starts with good data.</h3>
+                        <p>
+                            RAG does not magically understand an entire PDF. The document
+                            is parsed, divided into chunks, represented as embeddings,
+                            and indexed so relevant pieces can later be retrieved.
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
+
+            <!-- USER QUERY -->
+            <section class="card">
+
+                <div class="card-header">
+                    <div>
+                        <h2>1. Ask the knowledge base</h2>
+                        <p>Enter a natural-language question</p>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <textarea id="queryInput">What is the timeout configuration for API v2?</textarea>
+
+                    <div class="query-controls">
+                        <button class="primary-btn" onclick="runRAG()">
+                            ▶ Run RAG
+                        </button>
+
+                        <button class="secondary-btn" onclick="resetSimulator()">
+                            Reset
+                        </button>
+                    </div>
+
+                    <div class="preset-row">
+                        <button class="preset" onclick="setQuery('What is the timeout configuration for API v2?')">
+                            API timeout
+                        </button>
+
+                        <button class="preset" onclick="setQuery('How does biometric authentication work?')">
+                            Authentication
+                        </button>
+
+                        <button class="preset" onclick="setQuery('Which API version supports OOB authentication?')">
+                            API version
+                        </button>
+
+                        <button class="preset" onclick="setQuery('What are the supported authentication methods?')">
+                            Auth methods
+                        </button>
+                    </div>
+
+                </div>
+            </section>
+
+
+            <!-- RETRIEVAL -->
+            <section class="card">
+
+                <div class="card-header">
+                    <div>
+                        <h2>2. Retrieval</h2>
+                        <p>Find potentially relevant information</p>
+                    </div>
+
+                    <span class="search-pill hybrid">HYBRID SEARCH</span>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="retrieval-controls">
+
+                        <div class="control-box">
+                            <label>
+                                <span>Semantic weight</span>
+                                <span id="semanticValue">70%</span>
+                            </label>
+
+                            <input
+                                type="range"
+                                id="semanticSlider"
+                                min="0"
+                                max="100"
+                                value="70"
+                                oninput="updateWeights()"
+                            />
+                        </div>
+
+                        <div class="control-box">
+                            <label>
+                                <span>Top K retrieved</span>
+                                <span id="kValue">5</span>
+                            </label>
+
+                            <input
+                                type="range"
+                                id="kSlider"
+                                min="3"
+                                max="8"
+                                value="5"
+                                oninput="updateRetrieval()"
+                            />
+                        </div>
+
+                    </div>
+
+                    <div class="search-bar">
+                        <span class="search-pill semantic">
+                            Vector / Semantic Search
+                        </span>
+
+                        <span class="search-pill keyword">
+                            Keyword Search
+                        </span>
+
+                        <span class="search-pill hybrid">
+                            Combined Results
+                        </span>
+                    </div>
+
+                    <div class="explanation" style="margin-bottom:16px;">
+                        <div class="stage">What happens?</div>
+                        <h3 id="retrievalTitle">Query → embedding → search</h3>
+                        <p id="retrievalExplanation">
+                            Your query is represented in vector space and matched
+                            against the knowledge base. Keyword matching complements
+                            semantic similarity for exact terms such as "API v2".
+                        </p>
+                    </div>
+
+                    <div class="chunks" id="retrievedChunks">
+                        <!-- Generated by JS -->
+                    </div>
+
+                </div>
+            </section>
+
+
+            <!-- AUGMENTATION -->
+            <section class="card">
+
+                <div class="card-header">
+                    <div>
+                        <h2>4. Augmentation</h2>
+                        <p>Construct the context sent to the LLM</p>
+                    </div>
+
+                    <span class="search-pill semantic">CONTEXT</span>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="explanation" style="margin-bottom:15px;">
+                        <div class="stage">Important distinction</div>
+                        <h3>Augmentation ≠ just rewriting the question.</h3>
+                        <p>
+                            The system combines the user query with retrieved context,
+                            instructions, metadata and potentially conversation history
+                            to create the input that the LLM receives.
+                        </p>
+                    </div>
+
+                    <div class="prompt-preview" id="promptPreview"></div>
+
+                </div>
+            </section>
+
+
+            <!-- GENERATION -->
+            <section class="card">
+
+                <div class="card-header">
+                    <div>
+                        <h2>5. Generation</h2>
+                        <p>The LLM produces the final response</p>
+                    </div>
+
+                    <span class="search-pill hybrid">LLM</span>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="answer" id="answerBox">
+
+                        <h3>Generated answer</h3>
+
+                        <div id="answerText">
+                            Run the simulator to generate an answer.
+                        </div>
+
+                    </div>
+
+                    <div class="metrics" style="margin-top:15px;">
+
+                        <div class="metric">
+                            <div class="metric-value" id="metricChunks">—</div>
+                            <div class="metric-label">Context chunks</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-value" id="metricTokens">—</div>
+                            <div class="metric-label">Approx. context tokens</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-value" id="metricGrounding">—</div>
+                            <div class="metric-label">Grounding signal</div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+
+
+        <!-- RIGHT COLUMN -->
+        <div class="right-column">
+
+            <!-- CURRENT STAGE -->
+            <section class="card">
+
+                <div class="card-header">
+                    <div>
+                        <h2>What's happening?</h2>
+                        <p>Follow the RAG pipeline</p>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="progress-wrap">
+
+                        <div class="progress-label">
+                            <span>Pipeline progress</span>
+                            <span id="progressText">0%</span>
+                        </div>
+
+                        <div class="progress">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="explanation" id="stageExplanation">
+
+                        <div class="stage">Stage 1</div>
+
+                        <h3>Knowledge ingestion</h3>
+
+                        <p>
+                            Documents are prepared before users ever ask a question.
+                            Text is parsed, chunked, embedded and stored in a searchable
+                            index.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- RE-RANKING -->
+            <section class="card">
+
+                <div class="card-header">
+                    <div>
+                        <h2>3. Re-ranking</h2>
+                        <p>Improve precision after retrieval</p>
+                    </div>
+
+                    <span class="search-pill semantic">RERANK</span>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="explanation" style="margin-bottom:15px;">
+
+                        <div class="stage">Recall → Precision</div>
+
+                        <h3>Retrieval finds candidates. Re-ranking picks the best.</h3>
+
+                        <p>
+                            A production RAG system may retrieve 20 candidates and
+                            then use a re-ranker to identify the 3–5 chunks most
+                            relevant to the exact query.
+                        </p>
+
+                    </div>
+
+                    <div class="chunks" id="rerankedChunks">
+                        <!-- Generated by JS -->
+                    </div>
+
+                </div>
+            </section>
+
+
+            <!-- ARCHITECTURE -->
+            <section class="card">
+
+                <div class="card-header">
+                    <div>
+                        <h2>Architecture</h2>
+                        <p>The complete mental model</p>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <div style="font-family:ui-monospace,monospace;font-size:10px;line-height:2;color:#555;">
+
+                        <div>📄 Documents</div>
+                        <div style="padding-left:15px;">↓</div>
+                        <div>🧹 Parse / Clean</div>
+                        <div style="padding-left:15px;">↓</div>
+                        <div>✂️ Chunk</div>
+                        <div style="padding-left:15px;">↓</div>
+                        <div>🔢 Embeddings</div>
+                        <div style="padding-left:15px;">↓</div>
+                        <div>🗄️ Vector + Keyword Index</div>
+
+                        <div style="padding-left:15px;">↓</div>
+
+                        <div>👤 User Query</div>
+
+                        <div style="padding-left:15px;">↓</div>
+
+                        <div>🔎 Retrieval</div>
+
+                        <div style="padding-left:15px;">↓</div>
+
+                        <div>🎯 Re-ranking</div>
+
+                        <div style="padding-left:15px;">↓</div>
+
+                        <div>🧩 Context Assembly</div>
+
+                        <div style="padding-left:15px;">↓</div>
+
+                        <div>🤖 LLM</div>
+
+                        <div style="padding-left:15px;">↓</div>
+
+                        <div>💬 Grounded Answer</div>
+
+                    </div>
+
+                </div>
+            </section>
+
+
+            <!-- LEARNING NOTES -->
+            <section class="card">
+
+                <div class="card-header">
+                    <div>
+                        <h2>Key concepts</h2>
+                        <p>Remember these for interviews</p>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+
+                        <div class="explanation">
+                            <div class="stage">01</div>
+                            <h3>Embeddings</h3>
+                            <p>
+                                Convert text into numerical vectors that capture
+                                semantic meaning.
+                            </p>
+                        </div>
+
+                        <div class="explanation">
+                            <div class="stage">02</div>
+                            <h3>Hybrid Search</h3>
+                            <p>
+                                Combine semantic similarity with keyword/exact-match
+                                retrieval.
+                            </p>
+                        </div>
+
+                        <div class="explanation">
+                            <div class="stage">03</div>
+                            <h3>Re-ranking</h3>
+                            <p>
+                                Re-score retrieved candidates to improve relevance
+                                before sending context to the LLM.
+                            </p>
+                        </div>
+
+                        <div class="explanation">
+                            <div class="stage">04</div>
+                            <h3>Grounding</h3>
+                            <p>
+                                Give the model relevant source material so its response
+                                is anchored to the knowledge base.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   DEMO KNOWLEDGE BASE
+   ========================================================= */
+
+const knowledgeBase = [
+
+    {
+        id: "C-01",
+        title: "API v2 Timeout Configuration",
+        text: "API v2 supports a configurable request timeout. The default timeout is 30 seconds. Clients can configure the timeout up to a maximum of 60 seconds.",
+        keywords: ["timeout", "API v2", "30 seconds", "60 seconds"],
+        semantic: ["timeout", "configuration", "request", "API v2"],
+        metadata: ["API Guide", "v2.0", "Page 18"]
+    },
+
+    {
+        id: "C-02",
+        title: "API v1 Timeout Configuration",
+        text: "API v1 uses a default request timeout of 20 seconds. The legacy API does not support the same timeout configuration options available in API v2.",
+        keywords: ["timeout", "API v1", "20 seconds"],
+        semantic: ["timeout", "legacy API", "configuration"],
+        metadata: ["API Guide", "v1.0", "Page 31"]
+    },
+
+    {
+        id: "C-03",
+        title: "API Authentication",
+        text: "The platform supports OAuth 2.0, API keys and mutual TLS depending on the integration type. Authentication requirements vary by API.",
+        keywords: ["authentication", "OAuth", "API key", "mTLS"],
+        semantic: ["authentication", "security", "API access"],
+        metadata: ["Security Guide", "Page 12"]
+    },
+
+    {
+        id: "C-04",
+        title: "Biometric Authentication",
+        text: "Biometric authentication allows users to authenticate using device-supported biometrics such as fingerprint or face recognition. The authentication flow can use FIDO-based credentials.",
+        keywords: ["biometric", "fingerprint", "face", "FIDO"],
+        semantic: ["biometric authentication", "FIDO", "identity"],
+        metadata: ["Authentication Guide", "Page 7"]
+    },
+
+    {
+        id: "C-05",
+        title: "Out-of-Band Authentication",
+        text: "Out-of-band authentication enables authentication through a separate channel. The OOB flow may provide a URL that allows the user to complete authentication outside the original transaction channel.",
+        keywords: ["OOB", "out-of-band", "URL", "authentication"],
+        semantic: ["OOB authentication", "separate channel", "URL"],
+        metadata: ["Authentication Guide", "Page 22"]
+    },
+
+    {
+        id: "C-06",
+        title: "API v2 Versioning",
+        text: "API v2 introduced improvements to authentication, error handling and timeout configuration. Clients should explicitly specify the API version in requests.",
+        keywords: ["API v2", "versioning", "timeout", "authentication"],
+        semantic: ["API v2", "version", "authentication", "configuration"],
+        metadata: ["API Guide", "v2.0", "Page 5"]
+    },
+
+    {
+        id: "C-07",
+        title: "Supported Authentication Methods",
+        text: "Supported authentication methods include OAuth 2.0, API keys, mutual TLS, biometric authentication and out-of-band authentication where enabled by the integration.",
+        keywords: ["authentication methods", "OAuth", "API keys", "mTLS", "biometric", "OOB"],
+        semantic: ["authentication methods", "supported methods", "security"],
+        metadata: ["Security Guide", "Page 14"]
+    },
+
+    {
+        id: "C-08",
+        title: "API Rate Limits",
+        text: "API clients are subject to rate limits based on their subscription and integration type. When limits are exceeded, the platform returns a rate-limit response.",
+        keywords: ["rate limit", "API", "subscription"],
+        semantic: ["API limits", "traffic", "throttling"],
+        metadata: ["API Guide", "Page 42"]
+    }
+
+];
+
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
+let state = {
+    currentStage: 0,
+    semanticWeight: 70,
+    topK: 5,
+    retrieved: [],
+    reranked: []
+};
+
+
+/* =========================================================
+   QUERY HELPERS
+   ========================================================= */
+
+function setQuery(query) {
+    document.getElementById("queryInput").value = query;
+    runRAG();
+}
+
+
+function tokenize(text) {
+    return text
+        .toLowerCase()
+        .replace(/[^\w\s]/g, "")
+        .split(/\s+/)
+        .filter(Boolean);
+}
+
+
+/* =========================================================
+   SIMULATED SEMANTIC SIMILARITY
+   ========================================================= */
+
+function semanticScore(query, doc) {
+
+    const q = tokenize(query);
+
+    let matches = 0;
+
+    q.forEach(word => {
+
+        const semanticText =
+            [...doc.semantic, ...doc.text.split(" ")]
+            .join(" ")
+            .toLowerCase();
+
+        if (semanticText.includes(word)) {
+            matches++;
+        }
+
+    });
+
+    /*
+       Extra similarity rules make the demo behave more
+       like semantic search.
+    */
+
+    const queryLower = query.toLowerCase();
+
+    if (
+        queryLower.includes("timeout") &&
+        doc.semantic.includes("timeout")
+    ) {
+        matches += 3;
+    }
+
+    if (
+        queryLower.includes("biometric") &&
+        doc.semantic.includes("biometric authentication")
+    ) {
+        matches += 4;
+    }
+
+    if (
+        queryLower.includes("oob") &&
+        doc.semantic.includes("OOB authentication")
+    ) {
+        matches += 4;
+    }
+
+    if (
+        queryLower.includes("authentication") &&
+        doc.semantic.includes("authentication")
+    ) {
+        matches += 2;
+    }
+
+    return Math.min(
+        0.98,
+        0.28 + (matches / Math.max(q.length, 1)) * 0.65
+    );
+}
+
+
+/* =========================================================
+   KEYWORD SEARCH
+   ========================================================= */
+
+function keywordScore(query, doc) {
+
+    const q = tokenize(query);
+
+    let matches = 0;
+
+    q.forEach(word => {
+
+        if (
+            doc.keywords.some(k =>
+                k.toLowerCase().includes(word)
+            )
+        ) {
+            matches++;
+        }
+
+    });
+
+    return Math.min(
+        0.99,
+        0.15 + (matches / Math.max(q.length, 1)) * 0.9
+    );
+}
+
+
+/* =========================================================
+   HYBRID RETRIEVAL
+   ========================================================= */
+
+function performRetrieval(query) {
+
+    const semanticWeight = state.semanticWeight / 100;
+    const keywordWeight = 1 - semanticWeight;
+
+    return knowledgeBase
+        .map(doc => {
+
+            const semantic = semanticScore(query, doc);
+            const keyword = keywordScore(query, doc);
+
+            const combined =
+                semantic * semanticWeight +
+                keyword * keywordWeight;
+
+            return {
+                ...doc,
+                semanticScore: semantic,
+                keywordScore: keyword,
+                retrievalScore: combined
+            };
+
+        })
+        .sort((a,b) =>
+            b.retrievalScore - a.retrievalScore
+        )
+        .slice(0, state.topK);
+}
+
+
+/* =========================================================
+   RE-RANKING
+   ========================================================= */
+
+function rerank(results, query) {
+
+    const q = query.toLowerCase();
+
+    return results
+        .map(doc => {
+
+            let boost = 0;
+
+            /*
+               Exact phrase matching gets a large boost.
+            */
+
+            if (
+                q.includes("api v2") &&
+                doc.text.toLowerCase().includes("api v2")
+            ) {
+                boost += 0.15;
+            }
+
+            if (
+                q.includes("timeout") &&
+                doc.text.toLowerCase().includes("timeout")
+            ) {
+                boost += 0.12;
+            }
+
+            if (
+                q.includes("biometric") &&
+                doc.text.toLowerCase().includes("biometric")
+            ) {
+                boost += 0.15;
+            }
+
+            if (
+                q.includes("oob") &&
+                doc.text.toLowerCase().includes("out-of-band")
+            ) {
+                boost += 0.15;
+            }
+
+            const rerankScore =
+                Math.min(0.99, doc.retrievalScore + boost);
+
+            return {
+                ...doc,
+                rerankScore
+            };
+
+        })
+        .sort((a,b) =>
+            b.rerankScore - a.rerankScore
+        );
+
+}
+
+
+/* =========================================================
+   DISPLAY RETRIEVED CHUNKS
+   ========================================================= */
+
+function renderChunks(containerId, chunks, scoreField) {
+
+    const container =
+        document.getElementById(containerId);
+
+    container.innerHTML = "";
+
+    chunks.forEach((chunk, index) => {
+
+        const score =
+            Math.round(chunk[scoreField] * 100);
+
+        const div = document.createElement("div");
+
+        div.className = "chunk";
+
+        div.innerHTML = `
+            <div class="chunk-top">
+
+                <div class="chunk-title">
+                    <span class="rank-badge">${index + 1}</span>
+                    ${chunk.title}
+                </div>
+
+                <div class="score">
+                    ${score}% relevance
+                </div>
+
+            </div>
+
+            <p>${chunk.text}</p>
+
+            <div class="metadata">
+                ${chunk.metadata
+                    .map(item => `<span>${item}</span>`)
+                    .join("")}
+            </div>
+        `;
+
+        container.appendChild(div);
+
+    });
+
+}
+
+
+/* =========================================================
+   AUGMENTED PROMPT
+   ========================================================= */
+
+function buildPrompt(query, chunks) {
+
+    const context = chunks
+        .map((chunk, index) => {
+
+            return `[SOURCE ${index + 1}]
+Title: ${chunk.title}
+${chunk.text}
+Metadata: ${chunk.metadata.join(", ")}`;
+
+        })
+        .join("\n\n");
+
+    return `<span class="prompt-label">SYSTEM INSTRUCTION</span>
+
+You are a helpful assistant. Answer the user's question
+using the provided knowledge context. Do not invent facts
+that are not supported by the context.
+
+<span class="prompt-label">USER QUERY</span>
+
+${query}
+
+<span class="prompt-label">RETRIEVED CONTEXT</span>
+
+<span class="prompt-context">${context}</span>
+
+<span class="prompt-label">TASK</span>
+
+Answer the user query using the retrieved context.
+Mention the relevant source when appropriate.`;
+}
+
+
+/* =========================================================
+   GENERATE DEMO ANSWER
+   ========================================================= */
+
+function generateAnswer(query, chunks) {
+
+    const q = query.toLowerCase();
+
+    let answer = "";
+
+    if (
+        q.includes("timeout") &&
+        q.includes("api v2")
+    ) {
+
+        answer = `
+            <strong>API v2 has a default request timeout of
+            30 seconds, and clients can configure it up to
+            a maximum of 60 seconds.</strong>
+
+            <br><br>
+
+            This answer is grounded primarily in
+            <span class="citation">C-01</span>
+            and supported by the API v2 versioning information
+            in <span class="citation">C-06</span>.
+        `;
+
+    } else if (q.includes("biometric")) {
+
+        answer = `
+            Biometric authentication allows users to authenticate
+            using device-supported biometrics such as fingerprint
+            or face recognition. The authentication flow can use
+            FIDO-based credentials.
+
+            <br><br>
+
+            Source:
+            <span class="citation">C-04</span>
+        `;
+
+    } else if (
+        q.includes("oob") ||
+        q.includes("out-of-band")
+    ) {
+
+        answer = `
+            Out-of-band authentication uses a separate channel
+            to complete authentication. The flow may provide a
+            URL that allows the user to complete authentication
+            outside the original transaction channel.
+
+            <br><br>
+
+            Source:
+            <span class="citation">C-05</span>
+        `;
+
+    } else if (
+        q.includes("authentication") &&
+        q.includes("method")
+    ) {
+
+        answer = `
+            Supported authentication methods include OAuth 2.0,
+            API keys, mutual TLS, biometric authentication and
+            out-of-band authentication where enabled.
+
+            <br><br>
+
+            Source:
+            <span class="citation">C-07</span>
+        `;
+
+    } else {
+
+        const source =
+            chunks.length
+                ? chunks[0]
+                : null;
+
+        if (source) {
+
+            answer = `
+                Based on the retrieved knowledge, the most
+                relevant information is:
+
+                <br><br>
+
+                ${source.text}
+
+                <br><br>
+
+                Source:
+                <span class="citation">${source.id}</span>
+            `;
+
+        } else {
+
+            answer =
+                "I could not find sufficiently relevant information in the knowledge base.";
+
+        }
+
+    }
+
+    return answer;
+}
+
+
+/* =========================================================
+   PIPELINE EXPLANATIONS
+   ========================================================= */
+
+const stageInfo = [
+
+    {
+        stage: "Stage 1",
+        title: "Knowledge ingestion",
+        text:
+            "Documents are parsed, cleaned and divided into meaningful chunks. Each chunk is converted into an embedding and stored with metadata in a searchable index."
+    },
+
+    {
+        stage: "Stage 2",
+        title: "Retrieval",
+        text:
+            "The user's query is transformed into a representation that can be searched against the knowledge base. Hybrid retrieval combines semantic similarity with keyword matching."
+    },
+
+    {
+        stage: "Stage 3",
+        title: "Re-ranking",
+        text:
+            "The initial retrieval stage optimizes for recall. A re-ranker can then score the candidate chunks again to identify the most relevant context for the exact query."
+    },
+
+    {
+        stage: "Stage 4",
+        title: "Augmentation",
+        text:
+            "The system constructs an enriched LLM input containing the user query, retrieved context, instructions and potentially conversation history or metadata."
+    },
+
+    {
+        stage: "Stage 5",
+        title: "Generation",
+        text:
+            "The LLM processes the augmented context and generates a response. Because relevant source material was supplied, the answer can be grounded in the knowledge base."
+    }
+
+];
+
+
+/* =========================================================
+   UPDATE STAGE
+   ========================================================= */
+
+function updateStage(stage) {
+
+    state.currentStage = stage;
+
+    document.querySelectorAll(".pipeline-step")
+        .forEach((el, index) => {
+
+            el.classList.toggle(
+                "active",
+                index === stage
+            );
+
+            el.classList.toggle(
+                "done",
+                index < stage
+            );
+
+        });
+
+    const info = stageInfo[stage];
+
+    document.getElementById("stageExplanation")
+        .innerHTML = `
+            <div class="stage">${info.stage}</div>
+            <h3>${info.title}</h3>
+            <p>${info.text}</p>
+        `;
+
+    const progress =
+        stage * 25;
+
+    document.getElementById("progressBar")
+        .style.width = progress + "%";
+
+    document.getElementById("progressText")
+        .textContent = progress + "%";
+
+}
+
+
+/* =========================================================
+   MAIN RAG PIPELINE
+   ========================================================= */
+
+async function runRAG() {
+
+    const query =
+        document.getElementById("queryInput")
+        .value.trim();
+
+    if (!query) {
+        return;
+    }
+
+    /*
+       Stage 1 — ingestion
+    */
+
+    updateStage(0);
+
+    const nodes =
+        document.querySelectorAll(".flow-node");
+
+    nodes.forEach(node =>
+        node.classList.remove("highlight")
+    );
+
+    for (let i = 0; i < nodes.length; i++) {
+
+        nodes[i].classList.add("highlight");
+
+        await sleep(180);
+
+        nodes[i].classList.remove("highlight");
+    }
+
+
+    /*
+       Stage 2 — retrieval
+    */
+
+    updateStage(1);
+
+    await sleep(500);
+
+    const retrieved =
+        performRetrieval(query);
+
+    state.retrieved = retrieved;
+
+    renderChunks(
+        "retrievedChunks",
+        retrieved,
+        "retrievalScore"
+    );
+
+
+    /*
+       Stage 3 — reranking
+    */
+
+    updateStage(2);
+
+    await sleep(700);
+
+    const reranked =
+        rerank(retrieved, query);
+
+    state.reranked = reranked;
+
+    renderChunks(
+        "rerankedChunks",
+        reranked,
+        "rerankScore"
+    );
+
+
+    /*
+       Stage 4 — augmentation
+    */
+
+    updateStage(3);
+
+    await sleep(700);
+
+    const topContext =
+        reranked.slice(0, 3);
+
+    document.getElementById("promptPreview")
+        .innerHTML =
+            buildPrompt(query, topContext);
+
+
+    /*
+       Stage 5 — generation
+    */
+
+    updateStage(4);
+
+    await sleep(900);
+
+    const answer =
+        generateAnswer(query, topContext);
+
+    document.getElementById("answerText")
+        .innerHTML = answer;
+
+
+    /*
+       Metrics
+    */
+
+    const approxTokens =
+        topContext
+            .reduce((sum, c) =>
+                sum + Math.ceil(c.text.length / 4), 0
+            );
+
+    document.getElementById("metricChunks")
+        .textContent = topContext.length;
+
+    document.getElementById("metricTokens")
+        .textContent = approxTokens;
+
+    document.getElementById("metricGrounding")
+        .textContent = "High";
+
+}
+
+
+/* =========================================================
+   CONTROLS
+   ========================================================= */
+
+function updateWeights() {
+
+    const semantic =
+        Number(
+            document.getElementById("semanticSlider").value
+        );
+
+    state.semanticWeight = semantic;
+
+    document.getElementById("semanticValue")
+        .textContent = semantic + "%";
+
+    /*
+       Automatically re-run retrieval if the user
+       has already run the simulator.
+    */
+
+    if (state.retrieved.length) {
+
+        const query =
+            document.getElementById("queryInput")
+            .value;
+
+        const retrieved =
+            performRetrieval(query);
+
+        state.retrieved =
+            retrieved;
+
+        renderChunks(
+            "retrievedChunks",
+            retrieved,
+            "retrievalScore"
+        );
+
+    }
+
+}
+
+
+function updateRetrieval() {
+
+    const k =
+        Number(
+            document.getElementById("kSlider").value
+        );
+
+    state.topK = k;
+
+    document.getElementById("kValue")
+        .textContent = k;
+
+    if (state.retrieved.length) {
+
+        const query =
+            document.getElementById("queryInput")
+            .value;
+
+        const retrieved =
+            performRetrieval(query);
+
+        state.retrieved =
+            retrieved;
+
+        renderChunks(
+            "retrievedChunks",
+            retrieved,
+            "retrievalScore"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+function resetSimulator() {
+
+    state = {
+        currentStage: 0,
+        semanticWeight: 70,
+        topK: 5,
+        retrieved: [],
+        reranked: []
+    };
+
+    document.getElementById("semanticSlider").value = 70;
+    document.getElementById("kSlider").value = 5;
+
+    document.getElementById("semanticValue")
+        .textContent = "70%";
+
+    document.getElementById("kValue")
+        .textContent = "5";
+
+    document.getElementById("retrievedChunks")
+        .innerHTML = "";
+
+    document.getElementById("rerankedChunks")
+        .innerHTML = "";
+
+    document.getElementById("promptPreview")
+        .textContent = "";
+
+    document.getElementById("answerText")
+        .textContent =
+            "Run the simulator to generate an answer.";
+
+    document.getElementById("metricChunks")
+        .textContent = "—";
+
+    document.getElementById("metricTokens")
+        .textContent = "—";
+
+    document.getElementById("metricGrounding")
+        .textContent = "—";
+
+    updateStage(0);
+}
+
+
+/* =========================================================
+   UTIL
+   ========================================================= */
+
+function sleep(ms) {
+    return new Promise(resolve =>
+        setTimeout(resolve, ms)
+    );
+}
+
+
+/* =========================================================
+   PIPELINE NAVIGATION
+   ========================================================= */
+
+document.querySelectorAll(".pipeline-step")
+    .forEach(step => {
+
+        step.addEventListener("click", () => {
+
+            const stage =
+                Number(step.dataset.stage);
+
+            updateStage(stage);
+
+        });
+
+    });
+
+
+/* =========================================================
+   INITIAL STATE
+   ========================================================= */
+
+updateStage(0);
+
+</script>
+
+</body>
+</html>
